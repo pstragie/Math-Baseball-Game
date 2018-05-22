@@ -188,10 +188,10 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             destination.startingOuts = Int(startingOuts.value)
             destination.totalInnings = Int(totalInnings.value)
             if awayPlayerName.text == "" {
-                awayPlayerName.text = "Away team"
+                awayPlayerName.text = "Oudenaarde Frogs"
             }
             if homePlayerName.text == "" {
-                homePlayerName.text = "Home team"
+                homePlayerName.text = "Ronse Wolverines"
             }
             destination.awayPlayerName = awayPlayerName.text!
             destination.homePlayerName = homePlayerName.text!
