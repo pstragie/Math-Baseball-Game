@@ -7,14 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B6065DC620B45CE900943AB6 /* MathCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6065DC520B45CE900943AB6 /* MathCollectionViewCell.swift */; };
 		B692A77320B02358005FE30B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A77220B02358005FE30B /* AppDelegate.swift */; };
 		B692A77520B02358005FE30B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A77420B02358005FE30B /* ViewController.swift */; };
 		B692A77820B02358005FE30B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B692A77620B02358005FE30B /* Main.storyboard */; };
 		B692A77A20B023B8005FE30B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B692A77920B023B8005FE30B /* Assets.xcassets */; };
 		B692A77D20B023B8005FE30B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B692A77B20B023B8005FE30B /* LaunchScreen.storyboard */; };
+		B692A78520B02810005FE30B /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A78420B02810005FE30B /* GameViewController.swift */; };
+		B692A78720B02A5E005FE30B /* UIColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A78620B02A5E005FE30B /* UIColor+Hex.swift */; };
+		B692A78920B02AAB005FE30B /* UIColor+FlatColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A78820B02AAB005FE30B /* UIColor+FlatColors.swift */; };
+		B692A78B20B02AE4005FE30B /* ConnectionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A78A20B02AE4005FE30B /* ConnectionCheck.swift */; };
+		B692A78D20B02B0D005FE30B /* FullVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A78C20B02B0D005FE30B /* FullVersion.swift */; };
+		B692A78F20B02B43005FE30B /* IAPHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A78E20B02B43005FE30B /* IAPHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B6065DC520B45CE900943AB6 /* MathCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathCollectionViewCell.swift; sourceTree = "<group>"; };
 		B692A76F20B02358005FE30B /* Math Baseball Game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Math Baseball Game.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B692A77220B02358005FE30B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B692A77420B02358005FE30B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -22,6 +30,12 @@
 		B692A77920B023B8005FE30B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B692A77C20B023B8005FE30B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B692A77E20B023B8005FE30B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B692A78420B02810005FE30B /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		B692A78620B02A5E005FE30B /* UIColor+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Hex.swift"; sourceTree = "<group>"; };
+		B692A78820B02AAB005FE30B /* UIColor+FlatColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+FlatColors.swift"; sourceTree = "<group>"; };
+		B692A78A20B02AE4005FE30B /* ConnectionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionCheck.swift; sourceTree = "<group>"; };
+		B692A78C20B02B0D005FE30B /* FullVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullVersion.swift; sourceTree = "<group>"; };
+		B692A78E20B02B43005FE30B /* IAPHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,7 +70,14 @@
 			children = (
 				B692A77220B02358005FE30B /* AppDelegate.swift */,
 				B692A77420B02358005FE30B /* ViewController.swift */,
+				B692A78420B02810005FE30B /* GameViewController.swift */,
 				B692A77620B02358005FE30B /* Main.storyboard */,
+				B6065DC520B45CE900943AB6 /* MathCollectionViewCell.swift */,
+				B692A78620B02A5E005FE30B /* UIColor+Hex.swift */,
+				B692A78820B02AAB005FE30B /* UIColor+FlatColors.swift */,
+				B692A78A20B02AE4005FE30B /* ConnectionCheck.swift */,
+				B692A78C20B02B0D005FE30B /* FullVersion.swift */,
+				B692A78E20B02B43005FE30B /* IAPHelper.swift */,
 				B692A77920B023B8005FE30B /* Assets.xcassets */,
 				B692A77B20B023B8005FE30B /* LaunchScreen.storyboard */,
 				B692A77E20B023B8005FE30B /* Info.plist */,
@@ -135,7 +156,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B692A78B20B02AE4005FE30B /* ConnectionCheck.swift in Sources */,
 				B692A77520B02358005FE30B /* ViewController.swift in Sources */,
+				B692A78D20B02B0D005FE30B /* FullVersion.swift in Sources */,
+				B692A78920B02AAB005FE30B /* UIColor+FlatColors.swift in Sources */,
+				B692A78F20B02B43005FE30B /* IAPHelper.swift in Sources */,
+				B6065DC620B45CE900943AB6 /* MathCollectionViewCell.swift in Sources */,
+				B692A78720B02A5E005FE30B /* UIColor+Hex.swift in Sources */,
+				B692A78520B02810005FE30B /* GameViewController.swift in Sources */,
 				B692A77320B02358005FE30B /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -202,7 +230,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -213,12 +241,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -267,11 +296,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -281,6 +311,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HUS279SULR;
 				INFOPLIST_FILE = "Math Baseball Game/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -298,6 +329,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HUS279SULR;
 				INFOPLIST_FILE = "Math Baseball Game/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
