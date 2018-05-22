@@ -14,14 +14,17 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     var playerMode: Int?
     var player1Age: Int = 8
     var player2Age: Int = 8
-    var startingBalls: Int = 0
-    var startingStrikes: Int = 0
-    var totalInnings: Int = 0
-    var startingOuts: Int = 0
+    var startingBalls: Int = 1
+    var startingStrikes: Int = 1
+    var totalInnings: Int = 9
+    var startingOuts: Int = 1
     var homePlayerName: String = "Player 1"
     var awayPlayerName: String = "Player 2"
+    var selectedMaths: Array<String>?
     
-    var inning: Int = 0
+    var numberOfSigns: Int = 1
+    var signArray: Array<Int> = []
+    var inning: Int = 1
     var top: Bool = true
     var action: String = ""
     var outs: Int = 0
@@ -45,9 +48,27 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     var dTimeHandicapTime: Double = 0.0
     var player1Handicap: Double = 0.0
     var player2Handicap: Double = 0.0
-    
     var runnersPosAlgo: Int = 0
     var runningSuccessful: Bool = false
+    var teamInAction: Int = 2
+    // MARK:  math
+    var tablesDictVAway: Dictionary<Int,Array<Int>>? = [:]
+    var tablesDictDAway: Dictionary<Int, Array<Int>>? = [:]
+    var tablesDictVHome: Dictionary<Int,Array<Int>>? = [:]
+    var tablesDictDHome: Dictionary<Int, Array<Int>>? = [:]
+    var randomVermenigvuldigenAway: Array<Int> = []
+    var randomVermenigvuldigenHome: Array<Int> = []
+    var randomDelenAway: Array<Int> = []
+    var randomDelenHome: Array<Int> = []
+    var mult2: Int?
+    var mult1: Int?
+    var correctAnswer: String = ""
+    var randomOptellenAway: Array<Int> = []
+    var randomOptellenHome: Array<Int> = []
+    var randomAftrekkenAway: Array<Int> = []
+    var randomAftrekkenHome: Array<Int> = []
+    var somTotaal: Int?
+    var minTotaal: Int?
     
     // MARK: - Outlets
     @IBOutlet weak var keypadView: UIView!
@@ -110,14 +131,14 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     }
     
     @IBAction func keypadDoneButtonTapped(_ sender: UIButton) {
-        print("keypadDone tapped")
+//        print("keypadDone tapped")
         invalidateTimer()
         if action == "batting" || action == "defense" {
             defensiveTime = checkTime()
-            print("defensive time = \(defensiveTime)")
+//            print("defensive time = \(defensiveTime)")
         } else {
             offensiveTime = checkTime()
-            print("offensive time = \(offensiveTime)")
+//            print("offensive time = \(offensiveTime)")
         }
         if top {
             oTimeHandicapTime = offensiveTime * player1Handicap
@@ -126,8 +147,8 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             oTimeHandicapTime = offensiveTime * player2Handicap
             dTimeHandicapTime = defensiveTime * player1Handicap
         }
-        print("oTimeHandicapTime = \(oTimeHandicapTime)")
-        print("dTimeHandicapTime = \(dTimeHandicapTime)")
+//        print("oTimeHandicapTime = \(oTimeHandicapTime)")
+//        print("dTimeHandicapTime = \(dTimeHandicapTime)")
         
         resetTimer()
         self.mathQuestionView.isHidden = true
@@ -141,7 +162,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         goButton.isHidden = true
         if action == "" {
             action = "pitching"
-            inning = 0
+            inning = 1
             top = true
             balls = startingBalls
             strikes = startingStrikes
@@ -167,7 +188,20 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                 outs = startingOuts
                 action = "pitching"
             }
-            moveOn()
+            if top {
+                if action == "pitching" || action == "defense" {
+                    teamInAction = 2
+                } else {
+                    teamInAction = 1
+                }
+            } else {
+                if action == "pitching" || action == "defense" {
+                    teamInAction = 1
+                } else {
+                    teamInAction = 2
+                }
+            }
+            moveOn(team: teamInAction)
             progressView.progress = 0.0
             progressView.isHidden = false
             runTimer()
@@ -188,11 +222,24 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         }
         player1Handicap = 1 - ((8 - Double(player1Age)) * 0.05)    // age 8: handicap = 1 (no handicap)
         player2Handicap = 1 - ((8 - Double(player2Age)) * 0.05)   // e.g. age 6: handicap = 0.90 (handicap advantage), age 10: handicap = 1.10 (handicap)
-        print("player 1 handicap = \(player1Handicap)")
-        print("player 2 handicap = \(player2Handicap)")
+//        print("player 1 handicap = \(player1Handicap)")
+//        print("player 2 handicap = \(player2Handicap)")
         
         for keypad in keypadButtons {
             keypad.addTarget(self, action: #selector(keypadTouched(_:)), for: .touchUpInside)
+        }
+        
+        numberOfSigns = (selectedMaths?.count)!
+        if numberOfSigns == 0 {
+            selectedMaths = ["+", "-", "x", ":"]
+            numberOfSigns = (selectedMaths?.count)!
+        }
+        for x in 0..<numberOfSigns {
+            signArray.append(x)
+        }
+        
+        for s in selectedMaths! {
+            prepareNumbers(sign: s)
         }
         setupLayout()
     }
@@ -220,7 +267,78 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         
         
     }
-    
+    // MARK: - prepare numbers multiply
+    func prepareNumbers(sign: String) {
+        if sign == "x" {
+            // Fill tablesArray from selected rows
+            randomVermenigvuldigenAway = shuffleArray(array: vermenigvuldigen(playerAge: player1Age))
+            randomVermenigvuldigenHome = shuffleArray(array: vermenigvuldigen(playerAge: player2Age))
+            
+            // Shuffle multipliers and add to tableDictV
+            for x in 0..<randomVermenigvuldigenAway.count {
+                self.tablesDictVAway?[randomVermenigvuldigenAway[x]] = randomVermenigvuldigenAway
+            }
+            for x in 0..<randomVermenigvuldigenHome.count {
+                tablesDictVHome?[randomVermenigvuldigenHome[x]] = randomVermenigvuldigenHome
+            }
+//            print("tablesDictVAway: \(String(describing: tablesDictVAway))")
+//            print("tablesDictVHome: \(String(describing: tablesDictVHome))")
+        } else if sign == ":" {
+            randomDelenAway = shuffleArray(array: vermenigvuldigen(playerAge: player1Age))
+            randomDelenHome = shuffleArray(array: vermenigvuldigen(playerAge: player2Age))
+            let numberArray = vermenigvuldigen(playerAge: player1Age)
+            // away
+            for x in self.randomVermenigvuldigenAway {
+                for y in numberArray {
+                    if ((self.tablesDictDAway?[x]) != nil) {
+                        var arr: Array<Int> = (self.tablesDictDAway?[x])!
+                        arr.append(x * y)
+                        self.tablesDictDAway?[x] = arr
+                    } else {
+                        let mult = [x * y]
+                        self.tablesDictDAway?[x] = mult
+                    }
+                }
+            }
+            // Shuffle dividing numbers and add to tableDictD
+            for x in 0..<randomDelenAway.count {
+                let divideArray = (self.tablesDictDAway?[randomDelenAway[x]])!
+                let shuffledDividers = shuffleArray(array: divideArray)
+                self.tablesDictDAway?[randomDelenAway[x]] = shuffledDividers
+            }
+            // home
+            for x in self.randomVermenigvuldigenHome {
+                for y in numberArray {
+                    if ((self.tablesDictDHome?[x]) != nil) {
+                        var arr: Array<Int> = (self.tablesDictDHome?[x])!
+                        arr.append(x * y)
+                        self.tablesDictDHome?[x] = arr
+                    } else {
+                        let mult = [x * y]
+                        self.tablesDictDHome?[x] = mult
+                    }
+                }
+            }
+            // Shuffle dividing numbers and add to tableDictD
+            for x in 0..<randomDelenHome.count {
+                let divideArray = (self.tablesDictDHome?[randomDelenHome[x]])!
+                let shuffledDividers = shuffleArray(array: divideArray)
+                self.tablesDictDHome?[randomDelenHome[x]] = shuffledDividers
+            }
+//            print("tablesDictDAway: \(String(describing: tablesDictDAway))")
+//            print("tablesDictDHome: \(String(describing: tablesDictDHome))")
+        } else if sign == "+" {
+            randomOptellenAway = shuffleArray(array: optellen(playerAge: player1Age))
+            randomOptellenHome = shuffleArray(array: optellen(playerAge: player2Age))
+//            print("randomOptellenAway: \(randomOptellenAway)")
+//            print("randomOptellenHome: \(randomOptellenHome)")
+        } else if sign == "-" {
+            randomAftrekkenAway = shuffleArray(array: optellen(playerAge: player1Age))
+            randomAftrekkenHome = shuffleArray(array: optellen(playerAge: player2Age))
+//            print("randomAftrekkenAway: \(randomAftrekkenAway)")
+//            print("randomAftrekkenHome: \(randomAftrekkenHome)")
+        }
+    }
     // MARK: - setupLayout
     func setupLayout() {
         for button in keypadButtons {
@@ -252,9 +370,9 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             actionMessage.text = "Tap on Go! to continue"
         }
         
-        print("away player: \(awayPlayerName)")
+//        print("away player: \(awayPlayerName)")
         topPlayer.text = awayPlayerName
-        print("home player: \(homePlayerName)")
+//        print("home player: \(homePlayerName)")
         bottomPlayer.text = homePlayerName
         
         messageLabel.layer.cornerRadius = 10
@@ -290,7 +408,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     func storyBoard() {
         keypadView.isUserInteractionEnabled = false
         
-        print("storyBoard! inning: \(inning), top: \(top), action: \(action), balls: \(balls), strikes: \(strikes), outs: \(outs), runs: \(runs), totalRuns away: \(totalRunsAway), totalRuns home: \(totalRunsHome), hits away: \(hitsAway), hits home: \(hitsHome), errors away: \(errorsAway), errors home: \(errorsHome)")
+//        print("storyBoard! inning: \(inning), top: \(top), action: \(action), balls: \(balls), strikes: \(strikes), outs: \(outs), runs: \(runs), totalRuns away: \(totalRunsAway), totalRuns home: \(totalRunsHome), hits away: \(hitsAway), hits home: \(hitsHome), errors away: \(errorsAway), errors home: \(errorsHome)")
         updateBoxScore(inning: inning, top: top)
         updateBSOlabels()
         var defplayer: String = awayPlayerName
@@ -315,7 +433,11 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             messageLabel.text = "\(defplayer) can you make the out?"
             confirm()
         } else if action == "endgame" {
-            messageLabel.text = "Ball Game!"
+            if totalRunsAway == totalRunsHome {
+                messageLabel.text = "Tie Game!"
+            } else {
+                messageLabel.text = "Ball Game!"
+            }
             confirm()
         }
     }
@@ -323,17 +445,17 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     // MARK: - action result
     func actionResult(success: Bool) {
         //Upon success (pitching, batting, running, defense)
-        print("actionResult! inning: \(inning), top: \(top), action: \(action), success: \(success), runs: \(runs), total runs: \(totalruns)")
+//        print("actionResult! inning: \(inning), top: \(top), action: \(action), success: \(success), runs: \(runs), total runs: \(totalruns)")
         if action == "pitching" {
             if success {
                 //strike
-                print("Strike")
+//                print("Strike")
                 strike = true
                 self.actionMessage.text = "Good pitch!"
                 action = "batting"
             } else {
                 //ball
-                print("Ball")
+//                print("Ball")
                 strike = false
                 self.actionMessage.text = "Going wide"
                 self.action = "batting"
@@ -341,18 +463,18 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         } else if action == "batting" {
             if strike {
                 if success { //Contact on a strike
-                    print("success on a strike!")
+//                    print("success on a strike!")
                     var outcome: String = ""
-                    if oTimeHandicapTime < 1.0 {
+                    if oTimeHandicapTime < 2.0 {
                         outcome = "Going for the fence!"
                         hit = 4
-                    } else if oTimeHandicapTime < 2.0 {
+                    } else if oTimeHandicapTime < 3.0 {
                         outcome = "Flyball deep to left field!"
                         hit = 3
-                    } else if oTimeHandicapTime < 4.0 {
+                    } else if oTimeHandicapTime < 5.0 {
                         outcome = "Nice line drive into the outfield!"
                         hit = 2
-                    } else if oTimeHandicapTime < 6.0 {
+                    } else if oTimeHandicapTime < 7.0 {
                         outcome = "Good hit. Hussle for the single!"
                         hit = 1
                     } else {
@@ -363,16 +485,16 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                     self.action = "running"
                 } else { // Miss on a strike
                     strikes += 1
-                    print("strike \(strikes)")
+//                    print("strike \(strikes)")
                     self.actionMessage.text = "Swing and a miss!"
                     action = "pitching"
                     if strikes == 3 {
-                        print("3 strikes, batter is out")
+//                        print("3 strikes, batter is out")
                         self.actionMessage.text = "Strike out!"
                         strikes = startingStrikes
                         balls = startingBalls
                         outs += 1
-                        print("balls: \(balls), strikes: \(strikes), outs: \(outs)")
+//                        print("balls: \(balls), strikes: \(strikes), outs: \(outs)")
                         action = "pitching"
                     }
                     
@@ -380,7 +502,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                 strike = false
             } else { // wide ball
                 if success { // Checking on a ball
-                    print("Didn't swing at a ball")
+//                    print("Didn't swing at a ball")
                     self.actionMessage.text = "Great job with the check swing."
                     balls += 1
                     if balls < 4 {
@@ -394,7 +516,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                     }
                 } else { // Swinging at a ball
                     //swing and a miss unless very very good time?
-                    print("Swing and a miss at a ball")
+//                    print("Swing and a miss at a ball")
                     actionMessage.text = "Swing and a miss!"
                     if oTimeHandicapTime < 2 { // Contact on a ball
                         if outs == 2 {
@@ -411,7 +533,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                                 balls = startingBalls
                                 strikes = startingStrikes
                                 if strikes == 3 {
-                                    print("3 strikes, batter is out")
+//                                    print("3 strikes, batter is out")
                                     self.actionMessage.text = "Strike out!"
                                     strikes = startingStrikes
                                     balls = startingBalls
@@ -434,7 +556,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                         strikes = startingStrikes
                         
                         if strikes == 3 {
-                            print("3 strikes, batter is out")
+//                            print("3 strikes, batter is out")
                             self.actionMessage.text = "Strike out!"
                             strikes = startingStrikes
                             balls = startingBalls
@@ -448,7 +570,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         } else if action == "running" {
             if success {
                 //if correct continue to defense
-                print("correct answer for running")
+//                print("correct answer for running")
                 if hit == 0 || hit == 1 {
                     actionMessage.text = "Running to first base..."
                 } else if hit == 2 {
@@ -459,24 +581,24 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                     actionMessage.text = "Running home!"
                 }
                 runningSuccessful = true
-                print("offensive time(h) = \(oTimeHandicapTime)")
+//                print("offensive time(h) = \(oTimeHandicapTime)")
                 action = "defense"
             } else {
                 //if wrong answer and defense correct: runner out
-                print("wrong answer for running")
+//                print("wrong answer for running")
                 actionMessage.text = "Jogging to first base..."
                 runningSuccessful = false
-                print("offensive time(h) = \(oTimeHandicapTime)")
+//                print("offensive time(h) = \(oTimeHandicapTime)")
                 action = "defense"
             }
         } else if action == "defense" {
-            print("defensive time(h) = \(dTimeHandicapTime)")
+//            print("defensive time(h) = \(dTimeHandicapTime)")
             if runningSuccessful {
                 if success {
                     if dTimeHandicapTime < oTimeHandicapTime {
                         // Defense is faster, batter is out
                         outs += 1
-                        print("batter runner is out")
+//                        print("batter runner is out")
                         if hit == 0 || hit == 1 {
                             actionMessage.text = "Runner is out on first!"
                         } else if hit == 2 {
@@ -506,7 +628,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                             updateBasesImage()
                         }
                     } else {
-                        print("defense too slow")
+//                        print("defense too slow")
                         
                         if hit == 0 || hit == 1 {
                             actionMessage.text = "Defense too slow. Runner safe on first!"
@@ -534,7 +656,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                     }
                 } else { // wrong answer
                     // Defense too slow, runner safe on first
-                    print("runner safe")
+//                    print("runner safe")
                     
                     if hit == 0 {
                         actionMessage.text = "Safe on first due to a defensive error!"
@@ -585,7 +707,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else {
                 if success && dTimeHandicapTime < oTimeHandicapTime {
                     // Defense is faster, batter is out
-                    print("batter runner is out")
+//                    print("batter runner is out")
                     actionMessage.text = "Runner is out on first!"
                     outs += 1
                     balls = startingBalls
@@ -595,7 +717,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                         outs += 1
                     }
                 } else if !success {
-                    print("reached on error")
+//                    print("reached on error")
                     actionMessage.text = "Reached first base on error."
                     progressRunners("single")
                     updateBasesImage()
@@ -609,7 +731,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                     action = "pitching"
                 } else {
                     // foul ball
-                    print("foul ball")
+//                    print("foul ball")
                     actionMessage.text = "Foul ball! Try again."
                     if strikes < 2 {
                         strikes += 1
@@ -639,7 +761,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     // MARK: - check strikes and outs
     func checkStrikesAndOuts() {
         if strikes == 3 {
-            print("3 strikes, batter is out")
+//            print("3 strikes, batter is out")
             self.actionMessage.text = "Strike out!"
             strikes = startingStrikes
             balls = startingBalls
@@ -667,22 +789,113 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     }
     
     // MARK: - moveOn to math question
-    func moveOn() {
+    func moveOn(team: Int) {
         actionMessage.text = action + "..."
         // Show math
         mathQuestionView.isHidden = false
         // Fill math question
-        mathLabel1.text = "5"
-        mathLabel2.text = "3"
-        mathEquationLabel.text = "+"
-        
+        // Get random sign
+        let shuffledMaths = shuffleArray(array: signArray)
+        let mathSign = selectedMaths![shuffledMaths.first!]
+        mathEquationLabel.text = mathSign
+        answerField.text = ""
+        // Numbers
+        if mathSign == "+" {
+//            print("+")
+            if team == 1 {
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomOptellenAway.count)))
+                somTotaal = randomOptellenAway[randomNumber]
+            } else if team == 2 {
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomOptellenHome.count)))
+                somTotaal = randomOptellenHome[randomNumber]
+            }
+            // pick a random number smaller than somTotaal
+            let randomGetal = Int(arc4random_uniform(UInt32(somTotaal!)))
+            mathLabel1.text = String(randomGetal)
+            mathLabel2.text = String(somTotaal! - randomGetal)
+            correctAnswer = String(somTotaal!)
+        } else if mathSign == "-" {
+//            print("-")
+            if team == 1 {
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomAftrekkenAway.count)))
+                somTotaal = randomAftrekkenAway[randomNumber]
+            } else if team == 2 {
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomAftrekkenHome.count)))
+                somTotaal = randomAftrekkenHome[randomNumber]
+            }
+            // pick a random number smaller than somTotaal
+            let randomGetal = Int(arc4random_uniform(UInt32(somTotaal!)))
+            mathLabel1.text = String(somTotaal!)
+            mathLabel2.text = String(randomGetal)
+            correctAnswer = String(somTotaal! - randomGetal)
+            
+        } else if mathSign == "x" {
+//            print("x")
+            // Pick a random number from the dictionary keys
+            if team == 1 {
+                let randomTable = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenAway.count)))
+                mult1 = self.randomVermenigvuldigenAway[randomTable]
+            } else {
+                let randomTable = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenHome.count)))
+                mult1 = self.randomVermenigvuldigenHome[randomTable]
+            }
+            mult2 = tablesDictVAway?[mult1!]?[0]
+            mathLabel1.text = String(describing: mult2!)
+            mathLabel2.text = String(describing: mult1!)
+            correctAnswer = String(mult1! * mult2!)
+        } else {
+//            print(":")
+            if team == 1 {
+                let randomTable = Int(arc4random_uniform(UInt32(self.randomDelenAway.count)))
+                mult1 = self.randomDelenAway[randomTable]
+            } else {
+                let randomTable = Int(arc4random_uniform(UInt32(self.randomDelenHome.count)))
+                mult1 = self.randomDelenHome[randomTable]
+            }
+            mult2 = tablesDictDAway?[mult1!]?[0]
+            mathLabel1.text = String(describing: mult2!)
+            mathLabel2.text = String(describing: mult1!)
+            correctAnswer = String(mult2! / mult1!)
+        }
         answerField.becomeFirstResponder()
+    }
+    
+    
+    // MARK: - check Result
+    func checkResult() -> Bool {
+        let result: Bool = answerField.text == correctAnswer
+//        print("result: \(result)")
+//        print("progressView progress = \(progressView.progress)")
+        if result {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    
+    // MARK: - Textfield Delegate
+    // MARK: allowed characters
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool
+    {
+        let allowedCharacters = CharacterSet.decimalDigits
+        let characterSet = CharacterSet(charactersIn: string)
+        return allowedCharacters.isSuperset(of: characterSet)
+    }
+    
+    
+    // MARK: textfield becomes active
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        //        print("textFieldShouldBeginEditing")
+        textField.isUserInteractionEnabled = true
+        textField.isEnabled = true
+        return true
     }
     
     // MARK: keyboard return function
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // go to next inputfield
-        print("textFieldShouldReturn")
+//        print("textFieldShouldReturn")
         invalidateTimer()
         if action == "batting" || action == "defense" {
             defensiveTime = checkTime()
@@ -703,38 +916,6 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         
         return true
     }
-    
-    // MARK: - check Result
-    func checkResult() -> Bool {
-        let result: Bool = answerField.text == "8"
-        print("result: \(result)")
-        print("progressView progress = \(progressView.progress)")
-        if result {
-            return true
-        } else {
-            return false
-        }
-    }
-    
-    
-    
-    // MARK: allowed characters
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool
-    {
-        let allowedCharacters = CharacterSet.decimalDigits
-        let characterSet = CharacterSet(charactersIn: string)
-        return allowedCharacters.isSuperset(of: characterSet)
-    }
-    
-    // MARK: - Textfield Delegate
-    // MARK: textfield becomes active
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        //        print("textFieldShouldBeginEditing")
-        textField.isUserInteractionEnabled = true
-        textField.isEnabled = true
-        return true
-    }
-    
     // MARK: - progress runners on the image
     func progressRunners(_ hit: String) {
         if hit == "tag up" {
@@ -1215,7 +1396,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - update BSO labels
     func updateBSOlabels() {
-        print("updating BSO: balls: \(balls), strikes: \(strikes), outs: \(outs)")
+//        print("updating BSO: balls: \(balls), strikes: \(strikes), outs: \(outs)")
         if balls == 0 {
             ball1.backgroundColor = UIColor.white
             ball2.backgroundColor = UIColor.white
@@ -1264,5 +1445,55 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         actionMessage.text = "Tap 'back' to set up a new game."
         goButton.setTitle("Back", for: .normal)
         action = "endgame"
+    }
+    
+    // MARK: - Mathematics
+    func optellen(playerAge: Int) -> Array<Int> {
+        var optelnummers: Array<Int> = []
+        if playerAge < 8 {
+            for x in 0...20 {
+                optelnummers.append(x)
+            }
+        } else if playerAge < 10 {
+            for x in 0...100 {
+                optelnummers.append(x)
+            }
+        } else {
+            for x in 0...1000 {
+                optelnummers.append(x)
+            }
+        }
+        return optelnummers
+    }
+    
+    func vermenigvuldigen(playerAge: Int) -> Array<Int> {
+        var vermNummers: Array<Int> = []
+        if playerAge < 8 {
+            for x in 1...5 {
+                vermNummers.append(x)
+            }
+        } else if playerAge < 10 {
+            for x in 0...10 {
+                vermNummers.append(x)
+            }
+        } else {
+            for x in 0...11 {
+                vermNummers.append(x)
+            }
+        }
+        return vermNummers
+    }
+    
+    // MARK: shuffle
+    // MARK: shuffle Array
+    func shuffleArray(array: Array<Int>) -> Array<Int> {
+        var tempShuffled: Array<Int> = []
+        var tempArray = array
+        while 0 < tempArray.count {
+            let rand = Int(arc4random_uniform(UInt32(tempArray.count)))
+            tempShuffled.append(tempArray[rand])
+            tempArray.remove(at: rand)
+        }
+        return tempShuffled
     }
 }
