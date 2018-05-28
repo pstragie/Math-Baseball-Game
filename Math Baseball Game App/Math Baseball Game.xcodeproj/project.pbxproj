@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B6065DC620B45CE900943AB6 /* MathCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6065DC520B45CE900943AB6 /* MathCollectionViewCell.swift */; };
+		B6065DC820B5973300943AB6 /* EdgeInsetsLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6065DC720B5973200943AB6 /* EdgeInsetsLabel.swift */; };
 		B692A77320B02358005FE30B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A77220B02358005FE30B /* AppDelegate.swift */; };
 		B692A77520B02358005FE30B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B692A77420B02358005FE30B /* ViewController.swift */; };
 		B692A77820B02358005FE30B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B692A77620B02358005FE30B /* Main.storyboard */; };
@@ -23,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		B6065DC520B45CE900943AB6 /* MathCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathCollectionViewCell.swift; sourceTree = "<group>"; };
+		B6065DC720B5973200943AB6 /* EdgeInsetsLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeInsetsLabel.swift; sourceTree = "<group>"; };
 		B692A76F20B02358005FE30B /* Math Baseball Game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Math Baseball Game.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B692A77220B02358005FE30B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B692A77420B02358005FE30B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 				B692A78A20B02AE4005FE30B /* ConnectionCheck.swift */,
 				B692A78C20B02B0D005FE30B /* FullVersion.swift */,
 				B692A78E20B02B43005FE30B /* IAPHelper.swift */,
+				B6065DC720B5973200943AB6 /* EdgeInsetsLabel.swift */,
 				B692A77920B023B8005FE30B /* Assets.xcassets */,
 				B692A77B20B023B8005FE30B /* LaunchScreen.storyboard */,
 				B692A77E20B023B8005FE30B /* Info.plist */,
@@ -163,6 +166,7 @@
 				B692A78F20B02B43005FE30B /* IAPHelper.swift in Sources */,
 				B6065DC620B45CE900943AB6 /* MathCollectionViewCell.swift in Sources */,
 				B692A78720B02A5E005FE30B /* UIColor+Hex.swift in Sources */,
+				B6065DC820B5973300943AB6 /* EdgeInsetsLabel.swift in Sources */,
 				B692A78520B02810005FE30B /* GameViewController.swift in Sources */,
 				B692A77320B02358005FE30B /* AppDelegate.swift in Sources */,
 			);
@@ -317,7 +321,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.PWS-apps.Math-Baseball-Game";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.PWS-apps.MathBaseballGame";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -335,7 +339,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.PWS-apps.Math-Baseball-Game";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.PWS-apps.MathBaseballGame";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

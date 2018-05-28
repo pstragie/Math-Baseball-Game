@@ -69,8 +69,12 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     var randomAftrekkenHome: Array<Int> = []
     var somTotaal: Int?
     var minTotaal: Int?
+    var computer: String?
+    var tijden1steInnning: Array<Double> = []
     
     // MARK: - Outlets
+    @IBOutlet weak var extraMessage: UILabel!
+    @IBOutlet weak var runMessage: UILabel!
     @IBOutlet weak var keypadView: UIView!
     @IBOutlet weak var backButton: UIButton!
     @IBOutlet var myButtons: [UIButton]!
@@ -85,24 +89,34 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var actionMessage: UILabel!
     @IBOutlet weak var topPlayer: UILabel!
     @IBOutlet weak var bottomPlayer: UILabel!
+    @IBOutlet weak var boxInning1: UILabel!
     @IBOutlet weak var top1: UILabel!
     @IBOutlet weak var bottom1: UILabel!
+    @IBOutlet weak var boxInning2: UILabel!
     @IBOutlet weak var top2: UILabel!
     @IBOutlet weak var bottom2: UILabel!
+    @IBOutlet weak var boxInning3: UILabel!
     @IBOutlet weak var top3: UILabel!
     @IBOutlet weak var bottom3: UILabel!
+    @IBOutlet weak var boxInning4: UILabel!
     @IBOutlet weak var top4: UILabel!
     @IBOutlet weak var bottom4: UILabel!
+    @IBOutlet weak var boxInning5: UILabel!
     @IBOutlet weak var top5: UILabel!
     @IBOutlet weak var bottom5: UILabel!
+    @IBOutlet weak var boxInning6: UILabel!
     @IBOutlet weak var top6: UILabel!
     @IBOutlet weak var bottom6: UILabel!
+    @IBOutlet weak var boxInning7: UILabel!
     @IBOutlet weak var top7: UILabel!
     @IBOutlet weak var bottom7: UILabel!
+    @IBOutlet weak var boxInning8: UILabel!
     @IBOutlet weak var top8: UILabel!
     @IBOutlet weak var bottom8: UILabel!
+    @IBOutlet weak var boxInning9: UILabel!
     @IBOutlet weak var top9: UILabel!
     @IBOutlet weak var bottom9: UILabel!
+    @IBOutlet var inningsLabel: [UILabel]!
     @IBOutlet weak var topRuns: UILabel!
     @IBOutlet weak var bottomRuns: UILabel!
     @IBOutlet weak var topHits: UILabel!
@@ -121,6 +135,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet var bsoLabels: [UILabel]!
     @IBOutlet weak var eraseButton: UIButton!
     @IBOutlet weak var doneButton: UIButton!
+//    var flashMessage: UILabel!
     
     
     // MARK: - Actions
@@ -149,7 +164,12 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         }
 //        print("oTimeHandicapTime = \(oTimeHandicapTime)")
 //        print("dTimeHandicapTime = \(dTimeHandicapTime)")
-        
+        if top && computer == homePlayerName {
+            tijden1steInnning.append(dTimeHandicapTime)
+        } else if top == false && computer == awayPlayerName {
+            tijden1steInnning.append(dTimeHandicapTime)
+        }
+        print("tijden: \(tijden1steInnning)")
         resetTimer()
         self.mathQuestionView.isHidden = true
         progressView.progress = 0.0
@@ -159,8 +179,9 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func goButtonTapped(_ sender: UIButton) {
         keypadView.isUserInteractionEnabled = true
+        goButton.isUserInteractionEnabled = false
         goButton.isHidden = true
-        if action == "" {
+        if action == "" { // Start of the game
             action = "pitching"
             inning = 1
             top = true
@@ -168,9 +189,16 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             strikes = startingStrikes
             outs = startingOuts
             storyBoard()
-        } else if action == "endgame"{
+        } else if action == "endgame"{  // End of the game
             performSegue(withIdentifier: "unwindToViewController", sender: goButton)
-        } else {
+        } else if action == "change field" {
+            action = "pitching"
+            balls = startingBalls
+            strikes = startingStrikes
+            outs = startingOuts
+            runnersPosAlgo = 0
+            storyBoard()
+        } else { // Game continues
             resetTimer()
             if outs == 3 {
                 if top {
@@ -186,7 +214,8 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                 balls = startingBalls
                 strikes = startingStrikes
                 outs = startingOuts
-                action = "pitching"
+                runnersPosAlgo = 0
+                action = "change field"
             }
             if top {
                 if action == "pitching" || action == "defense" {
@@ -212,6 +241,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("player mode: \(String(describing: playerMode))")
         answerField.delegate = self
         // Do any additional setup after loading the view.
         if player1Age > 16 {
@@ -237,7 +267,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         for x in 0..<numberOfSigns {
             signArray.append(x)
         }
-        
+//        print("selectedMaths = \(String(describing: selectedMaths))")
         for s in selectedMaths! {
             prepareNumbers(sign: s)
         }
@@ -247,6 +277,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         basesImage.transform = CGAffineTransform(rotationAngle: -CGFloat(Double.pi/4))
+        answerField.resignFirstResponder()
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -267,7 +298,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         
         
     }
-    // MARK: - prepare numbers multiply
+    // MARK: - prepare numbers
     func prepareNumbers(sign: String) {
         if sign == "x" {
             // Fill tablesArray from selected rows
@@ -281,50 +312,61 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             for x in 0..<randomVermenigvuldigenHome.count {
                 tablesDictVHome?[randomVermenigvuldigenHome[x]] = randomVermenigvuldigenHome
             }
-//            print("tablesDictVAway: \(String(describing: tablesDictVAway))")
-//            print("tablesDictVHome: \(String(describing: tablesDictVHome))")
         } else if sign == ":" {
             randomDelenAway = shuffleArray(array: vermenigvuldigen(playerAge: player1Age))
             randomDelenHome = shuffleArray(array: vermenigvuldigen(playerAge: player2Age))
-            let numberArray = vermenigvuldigen(playerAge: player1Age)
+            let numberArrayAway = vermenigvuldigen(playerAge: player1Age)
             // away
-            for x in self.randomVermenigvuldigenAway {
-                for y in numberArray {
-                    if ((self.tablesDictDAway?[x]) != nil) {
-                        var arr: Array<Int> = (self.tablesDictDAway?[x])!
-                        arr.append(x * y)
-                        self.tablesDictDAway?[x] = arr
-                    } else {
-                        let mult = [x * y]
-                        self.tablesDictDAway?[x] = mult
+            for x in randomDelenAway {
+                if x != 0 {
+                    for y in numberArrayAway {
+                        
+                        if ((self.tablesDictDAway?[x]) != nil) {
+                            var arr: Array<Int> = (self.tablesDictDAway?[x])!
+                            arr.append(x * y)
+                            self.tablesDictDAway?[x] = arr
+                        } else {
+                            let mult = [x * y]
+                            self.tablesDictDAway?[x] = mult
+                        }
+                        
                     }
                 }
             }
             // Shuffle dividing numbers and add to tableDictD
+            /*
             for x in 0..<randomDelenAway.count {
+                print("tablesDictDAway: \(String(describing: tablesDictDAway))")
+                print("randomDelenAway: \(String(describing: randomDelenAway))")
                 let divideArray = (self.tablesDictDAway?[randomDelenAway[x]])!
                 let shuffledDividers = shuffleArray(array: divideArray)
                 self.tablesDictDAway?[randomDelenAway[x]] = shuffledDividers
             }
+            */
             // home
-            for x in self.randomVermenigvuldigenHome {
-                for y in numberArray {
-                    if ((self.tablesDictDHome?[x]) != nil) {
-                        var arr: Array<Int> = (self.tablesDictDHome?[x])!
-                        arr.append(x * y)
-                        self.tablesDictDHome?[x] = arr
-                    } else {
-                        let mult = [x * y]
-                        self.tablesDictDHome?[x] = mult
+            let numberArrayHome = vermenigvuldigen(playerAge: player2Age)
+            for x in randomDelenHome {
+                if x != 0 {
+                    for y in numberArrayHome {
+                        if ((self.tablesDictDHome?[x]) != nil) {
+                            var arr: Array<Int> = (self.tablesDictDHome?[x])!
+                            arr.append(x * y)
+                            self.tablesDictDHome?[x] = arr
+                        } else {
+                            let mult = [x * y]
+                            self.tablesDictDHome?[x] = mult
+                        }
                     }
                 }
             }
             // Shuffle dividing numbers and add to tableDictD
+            /*
             for x in 0..<randomDelenHome.count {
                 let divideArray = (self.tablesDictDHome?[randomDelenHome[x]])!
                 let shuffledDividers = shuffleArray(array: divideArray)
                 self.tablesDictDHome?[randomDelenHome[x]] = shuffledDividers
             }
+            */
 //            print("tablesDictDAway: \(String(describing: tablesDictDAway))")
 //            print("tablesDictDHome: \(String(describing: tablesDictDHome))")
         } else if sign == "+" {
@@ -381,11 +423,41 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         messageLabel.layer.borderColor = UIColor.FlatColor.Violet.Wisteria.cgColor
         messageLabel.backgroundColor = UIColor.init(white: 0.8, alpha: 0.8)
         
+        actionMessage.alpha = 1.0
         actionMessage.layer.cornerRadius = 10
         actionMessage.layer.masksToBounds = true
         actionMessage.layer.borderWidth = 2
         actionMessage.layer.borderColor = UIColor.FlatColor.Red.WellRead.cgColor
         actionMessage.backgroundColor = UIColor.init(white: 0.8, alpha: 0.8)
+        
+        extraMessage.alpha = 0.0
+        extraMessage.layer.cornerRadius = 10
+        extraMessage.layer.masksToBounds = true
+        extraMessage.layer.borderWidth = 2
+        extraMessage.layer.borderColor = UIColor.FlatColor.Violet.Wisteria.cgColor
+        extraMessage.backgroundColor = UIColor.init(white: 0.8, alpha: 0.8)
+        
+        
+        
+        /*
+        flashMessage = UILabel()
+        flashMessage.text = "test"
+        flashMessage.layer.cornerRadius = 10
+        flashMessage.layer.borderWidth = 2
+        flashMessage.font = UIFont.systemFont(ofSize: 25)
+        flashMessage.layer.borderColor = UIColor.FlatColor.Red.WellRead.cgColor
+        flashMessage.backgroundColor = UIColor.white
+        flashMessage.layer.masksToBounds = true
+        flashMessage.center = CGPoint(x: 100, y: -40)
+        view.addSubview(flashMessage)
+        */
+        
+        runMessage.alpha = 0.0
+        runMessage.layer.cornerRadius = 10
+        runMessage.layer.borderWidth = 0
+        runMessage.layer.masksToBounds = true
+        runMessage.tintColor = UIColor.FlatColor.Red.TerraCotta
+        runMessage.backgroundColor = UIColor(white: 1.0, alpha: 0.7)
         
         progressView.layer.cornerRadius = 10
         progressView.layer.masksToBounds = true
@@ -406,339 +478,641 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - storyboard
     func storyBoard() {
-        keypadView.isUserInteractionEnabled = false
-        
-//        print("storyBoard! inning: \(inning), top: \(top), action: \(action), balls: \(balls), strikes: \(strikes), outs: \(outs), runs: \(runs), totalRuns away: \(totalRunsAway), totalRuns home: \(totalRunsHome), hits away: \(hitsAway), hits home: \(hitsHome), errors away: \(errorsAway), errors home: \(errorsHome)")
-        updateBoxScore(inning: inning, top: top)
-        updateBSOlabels()
-        var defplayer: String = awayPlayerName
-        var offplayer: String = homePlayerName
-        if top {
-            offplayer = awayPlayerName
-            defplayer = homePlayerName
-        } else {
-            offplayer = homePlayerName
-            defplayer = awayPlayerName
-        }
-        if action == "pitching" {
-            messageLabel.text = "\(defplayer) ready to pitch?"
-            confirm()
-        } else if action == "batting" {
-            messageLabel.text = "\(offplayer) ready to bat?"
-            confirm()
-        } else if action == "running" {
-            messageLabel.text = "\(offplayer) how fast can you run?"
-            confirm()
-        } else if action == "defense" {
-            messageLabel.text = "\(defplayer) can you make the out?"
-            confirm()
-        } else if action == "endgame" {
-            if totalRunsAway == totalRunsHome {
-                messageLabel.text = "Tie Game!"
+        if playerMode == 2 {
+            print("2 player mode selected")
+            keypadView.isUserInteractionEnabled = false
+            updateBoxScore(inning: inning, top: top)
+            updateBSOlabels()
+            var defplayer: String = awayPlayerName
+            var offplayer: String = homePlayerName
+            if top {
+                offplayer = awayPlayerName
+                defplayer = homePlayerName
             } else {
-                messageLabel.text = "Ball Game!"
+                offplayer = homePlayerName
+                defplayer = awayPlayerName
             }
-            confirm()
+            if action == "pitching" {
+                messageLabel.text = "\(defplayer) ready to pitch?"
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                }
+                confirm()
+            } else if action == "batting" {
+                messageLabel.text = "\(offplayer) ready to bat?"
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                }
+                confirm()
+            } else if action == "running" {
+                messageLabel.text = "\(offplayer) how fast can you run?"
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                }
+                confirm()
+            } else if action == "defense" {
+                messageLabel.text = "\(defplayer) can you make the out?"
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                }
+                confirm()
+            } else if action == "endgame" {
+                if totalRunsAway == totalRunsHome {
+                    messageLabel.text = "Tie Game!"
+                } else {
+                    messageLabel.text = "Ball Game!"
+                }
+                confirm()
+            } else if action == "change field" {
+                messageLabel.text = "Change field!"
+                actionMessage.text = "Pitcher is warming up."
+                action = "pitching"
+                confirm()
+            }
+        } else { // player1Mode!
+            print("1 player mode selected")
+            if homePlayerName == "Oudenaarde Frogs" && awayPlayerName != "Ronse Wolverines" {
+                // live player = away team
+                computer = homePlayerName
+            } else if homePlayerName != "Oudenaarde Frogs" && awayPlayerName == "Ronse Wolverines" {
+                // live player = home team
+                computer = awayPlayerName
+            } else if homePlayerName == "Oudenaarde Frogs" && awayPlayerName == "Ronse Wolverines" {
+                // arbitrary live player = away team
+                computer = homePlayerName
+            } else {
+                // arbitrary live player = home team
+                computer = awayPlayerName
+            }
+            
+            keypadView.isUserInteractionEnabled = false
+            updateBoxScore(inning: inning, top: top)
+            updateBSOlabels()
+            var defplayer: String = awayPlayerName
+            var offplayer: String = homePlayerName
+            if top {
+                offplayer = awayPlayerName
+                defplayer = homePlayerName
+            } else {
+                offplayer = homePlayerName
+                defplayer = awayPlayerName
+            }
+            if action == "pitching" {
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                }
+                if computer == homePlayerName { // computer pitches}
+                    messageLabel.text = "\(defplayer) is pitching."
+                    actionResult(success: calculateComputerPitch())
+                } else {
+                    messageLabel.text = "\(defplayer) ready to pitch?"
+                    confirm()
+                }
+            } else if action == "batting" {
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                }
+                if computer == homePlayerName { // player bats
+                    messageLabel.text = "\(offplayer) ready to bat?"
+                    confirm()
+                } else { // computer bats
+                    messageLabel.text = "\(offplayer) is batting."
+                    actionResult(success: calculateComputerBatting())
+                }
+            } else if action == "running" {
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                }
+                if computer == homePlayerName { // player runs
+                    messageLabel.text = "\(offplayer) how fast can you run?"
+                    confirm()
+                } else { // computer runs
+                    messageLabel.text = "(Offplayer) is running."
+                    actionResult(success: calculateRunning())
+                }
+            } else if action == "defense" {
+                if top {
+                    bottomPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                    topPlayer.backgroundColor = UIColor.white
+                } else {
+                    bottomPlayer.backgroundColor = UIColor.white
+                    topPlayer.backgroundColor = UIColor.FlatColor.Green.MountainMeadow
+                }
+                if computer == homePlayerName { // computer defends
+                    messageLabel.text = "\(defplayer) is defending."
+                    actionResult(success: calculateDefense())
+                } else {
+                    messageLabel.text = "\(defplayer) can you make the out?"
+                    confirm()
+                }
+            } else if action == "endgame" {
+                if totalRunsAway == totalRunsHome {
+                    messageLabel.text = "Tie Game!"
+                } else {
+                    messageLabel.text = "Ball Game!"
+                }
+                confirm()
+            } else if action == "change field" {
+                messageLabel.text = "Change field!"
+                actionMessage.text = "Pitcher is warming up."
+                action = "pitching"
+                confirm()
+            }
         }
     }
     
-    // MARK: - action result
-    func actionResult(success: Bool) {
-        //Upon success (pitching, batting, running, defense)
-//        print("actionResult! inning: \(inning), top: \(top), action: \(action), success: \(success), runs: \(runs), total runs: \(totalruns)")
-        if action == "pitching" {
-            if success {
-                //strike
-//                print("Strike")
-                strike = true
-                self.actionMessage.text = "Good pitch!"
-                action = "batting"
+    // MARK: - Calucations computer results
+    func calculateComputerPitch() -> Bool {
+        // random 1/4 = ball
+        let ballsAndStrikes: Array<Bool> = [true, true, true, false]
+        let randomPitch = Int(arc4random_uniform(UInt32(ballsAndStrikes.count)))
+        let pitchResult = ballsAndStrikes[randomPitch]
+        return pitchResult
+    }
+    
+    func calculateComputerBatting() -> Bool {
+        // random times
+        let battingTimes: Array<Double> = [0.9, 1.9, 2.9, 3.9, 4.9, 5.9, 6.9, 7.9, 8.9, 9.9]
+        let randomBatTime = Int(arc4random_uniform(UInt32(battingTimes.count)))
+        if computer == homePlayerName {
+            oTimeHandicapTime = battingTimes[randomBatTime] * (1 / player1Handicap)
+        } else {
+            oTimeHandicapTime = battingTimes[randomBatTime] * (1 / player2Handicap)
+        }
+        // random bat result
+        let battingResults: Array<Bool> = [true, true, false]
+        let randomBatting = Int(arc4random_uniform(UInt32(battingResults.count)))
+        let battingResult = battingResults[randomBatting]
+        return battingResult
+    }
+    
+    func calculateRunning() -> Bool {
+        // running times
+        if inning == 1 { // inning 1 -> random time
+            let runTimes: Array<Double> = [0.9, 1.9, 2.9, 3.9, 4.9, 5.9, 6.9, 7.9, 8.9, 9.9]
+            let randomRunTime = Int(arc4random_uniform(UInt32(runTimes.count)))
+            if computer == homePlayerName {
+                oTimeHandicapTime = runTimes[randomRunTime] * (1 / player1Handicap)
             } else {
-                //ball
-//                print("Ball")
-                strike = false
-                self.actionMessage.text = "Going wide"
-                self.action = "batting"
+                oTimeHandicapTime = runTimes[randomRunTime] * (1 / player2Handicap)
             }
-        } else if action == "batting" {
-            if strike {
-                if success { //Contact on a strike
-//                    print("success on a strike!")
-                    var outcome: String = ""
-                    if oTimeHandicapTime < 2.0 {
-                        outcome = "Going for the fence!"
-                        hit = 4
-                    } else if oTimeHandicapTime < 3.0 {
-                        outcome = "Flyball deep to left field!"
-                        hit = 3
-                    } else if oTimeHandicapTime < 5.0 {
-                        outcome = "Nice line drive into the outfield!"
-                        hit = 2
-                    } else if oTimeHandicapTime < 7.0 {
-                        outcome = "Good hit. Hussle for the single!"
-                        hit = 1
+        } else { // use mean times from player}
+            let sumOfPlayerTimes = tijden1steInnning.reduce(0, +)
+            let avgPlayerTime = sumOfPlayerTimes / Double(tijden1steInnning.count)
+            if computer == homePlayerName {
+                oTimeHandicapTime = avgPlayerTime * (1 / player1Handicap)
+            } else {
+                oTimeHandicapTime = avgPlayerTime * (1 / player2Handicap)
+            }
+        }
+        // running result
+        let runResults: Array<Bool> = [true, true, true, true, true, true, true, true, false]
+        let randomRun = Int(arc4random_uniform(UInt32(runResults.count)))
+        let runResult = runResults[randomRun]
+        return runResult
+    }
+    
+    func calculateDefense() -> Bool {
+        // defensive times
+        if inning == 1 { // inning 1 -> random time
+            let defensiveTimes: Array<Double> = [0.9, 1.9, 2.9, 3.9, 4.9, 5.9, 6.9, 7.9, 8.9, 9.9]
+            let randomDefenseTime = Int(arc4random_uniform(UInt32(defensiveTimes.count)))
+            if computer == homePlayerName {
+                oTimeHandicapTime = defensiveTimes[randomDefenseTime] * (1 / player1Handicap)
+            } else {
+                oTimeHandicapTime = defensiveTimes[randomDefenseTime] * (1 / player2Handicap)
+            }
+        } else { // use mean times from player}
+            let sumOfPlayerTimes = tijden1steInnning.reduce(0, +)
+            let avgPlayerTime = sumOfPlayerTimes / Double(tijden1steInnning.count)
+            if computer == homePlayerName {
+                dTimeHandicapTime = avgPlayerTime * (1 / player2Handicap)
+            } else {
+                dTimeHandicapTime = avgPlayerTime * (1 / player1Handicap)
+            }
+        }
+        
+        // running result
+        let defensiveResults: Array<Bool> = [true, true, true, false]
+        let randomDefense = Int(arc4random_uniform(UInt32(defensiveResults.count)))
+        let defensiveResult = defensiveResults[randomDefense]
+        return defensiveResult
+    }
+    
+    // MARK: - action result
+    // MARK: pitching result
+    func pitching(success: Bool) {
+        if success {
+            //strike
+            //                print("Strike")
+            strike = true
+            self.actionMessage.text = "Good pitch!"
+        } else {
+            //ball
+            //                print("Ball")
+            strike = false
+            actionMessage.text = "Going wide"
+        }
+        self.action = "batting"
+    }
+    
+    // MARK: batting result
+    func batting(success: Bool) {
+//        print("strike: \(strike)")
+        if strike { // pitch was a strike
+            if success { //Contact on a strike
+                //                    print("success on a strike!")
+                var outcome: String = ""
+                if oTimeHandicapTime < 2.0 {
+                    outcome = "Going for the fence!"
+                    hit = 4
+                } else if oTimeHandicapTime < 3.0 {
+                    outcome = "Flyball deep to left field!"
+                    hit = 3
+                } else if oTimeHandicapTime < 5.0 {
+                    outcome = "Nice line drive into the outfield!"
+                    hit = 2
+                } else if oTimeHandicapTime < 7.0 {
+                    outcome = "Good hit. Hussle for the single!"
+                    hit = 1
+                } else {
+                    outcome = "Hmmm. You better hussle!"
+                    hit = 0
+                }
+                self.actionMessage.text = "Nice swing! \(outcome)"
+                self.action = "running"
+            } else { // Miss on a strike
+                strikes += 1
+                //                    print("strike \(strikes)")
+                self.actionMessage.text = "Swing and a miss!"
+                action = "pitching"
+                if strikes == 3 {
+                    //                        print("3 strikes, batter is out")
+                    showExtraMessage("Strike out!")
+                    strikes = startingStrikes
+                    balls = startingBalls
+                    outs += 1
+                    //                        print("balls: \(balls), strikes: \(strikes), outs: \(outs)")
+                    if outs == 3 {
+                        balls = startingBalls
+                        strikes = startingStrikes
+                        if top {
+                            top = false
+                        } else {
+                            top = true
+                            inning += 1
+                        }
+                        outs = startingOuts
+                        runs = 0
+                        runnersPosAlgo = 0
+                        action = "change field"
+                        showExtraMessage("Strike out! Change field.")
                     } else {
-                        outcome = "Hmmm. You better hussle!"
-                        hit = 0
+                        action = "pitching"
                     }
-                    self.actionMessage.text = "Nice swing! \(outcome)"
-                    self.action = "running"
-                } else { // Miss on a strike
-                    strikes += 1
-//                    print("strike \(strikes)")
-                    self.actionMessage.text = "Swing and a miss!"
+                }
+                
+            }
+            strike = false
+        } else { // wide ball
+            if success { // Checking on a ball
+                //                    print("Didn't swing at a ball")
+                self.actionMessage.text = "Great job with the check swing."
+                balls += 1
+                if balls < 4 {
                     action = "pitching"
+                } else {
+                    showExtraMessage("Base on balls!")
+                    balls = startingBalls
+                    strikes = startingStrikes
+                    action = "pitching"
+                    progressRunners("bob")
+                }
+            } else { // Swinging at a ball
+                //swing and a miss unless very very good time?
+                //                    print("Swing and a miss at a ball")
+                actionMessage.text = "Swing and a miss!"
+                if oTimeHandicapTime < 2 { // Good reaction time on swing and miss at a ball
+//                    print("Wrong answer in less than 2 seconds")
+                    if outs == 2 {
+                        // dropped third strike
+                        showExtraMessage("Swing and a miss! Dropped third strike! Run!")
+                        action = "running"
+                        balls = startingBalls
+                        strikes = startingStrikes
+                    } else if outs < 2 {
+                        if runnersPosAlgo == 1 || runnersPosAlgo == 3 || runnersPosAlgo == 5 || runnersPosAlgo == 7 {
+                            //Dropped third strike not possible
+                            showExtraMessage("Batter is out!")
+                            outs += 1
+                            balls = startingBalls
+                            strikes = startingStrikes
+                            
+                            if outs == 3 {
+                                balls = startingBalls
+                                strikes = startingStrikes
+                                if top {
+                                    top = false
+                                } else {
+                                    top = true
+                                    inning += 1
+                                }
+                                outs = startingOuts
+                                runs = 0
+                                runnersPosAlgo = 0
+                                action = "change field"
+                            } else {
+                                action = "pitching"
+                            }
+                        } else {
+                            //Dropped third strike, 1B not occupied
+                            showExtraMessage("Dropped third strike! 1B is empty, go for it!")
+                            balls = startingBalls
+                            strikes = startingStrikes
+                            action = "running"
+                        }
+                    }
+                } else { // Missed a ball
+//                    print("wrong answer, swing and a miss at a ball")
+                    actionMessage.text = "That's a swing! Strike!"
+                    strikes += 1
+                    
                     if strikes == 3 {
-//                        print("3 strikes, batter is out")
-                        self.actionMessage.text = "Strike out!"
+                        //                            print("3 strikes, batter is out")
+                        showExtraMessage("Strike out!")
                         strikes = startingStrikes
                         balls = startingBalls
                         outs += 1
-//                        print("balls: \(balls), strikes: \(strikes), outs: \(outs)")
-                        action = "pitching"
-                    }
-                    
-                }
-                strike = false
-            } else { // wide ball
-                if success { // Checking on a ball
-//                    print("Didn't swing at a ball")
-                    self.actionMessage.text = "Great job with the check swing."
-                    balls += 1
-                    if balls < 4 {
-                        action = "pitching"
-                    } else {
-                        actionMessage.text = "Base on balls!"
-                        balls = startingBalls
-                        strikes = startingStrikes
-                        action = "pitching"
-                        progressRunners("bob")
-                    }
-                } else { // Swinging at a ball
-                    //swing and a miss unless very very good time?
-//                    print("Swing and a miss at a ball")
-                    actionMessage.text = "Swing and a miss!"
-                    if oTimeHandicapTime < 2 { // Contact on a ball
-                        if outs == 2 {
-                            // dropped third strike
-                            actionMessage.text = "Swing and a miss! Dropped third strike! Run!"
-                            action = "running"
+                        if outs == 3 {
                             balls = startingBalls
                             strikes = startingStrikes
-                        } else if outs < 2 {
-                            if runnersPosAlgo == 1 || runnersPosAlgo == 3 || runnersPosAlgo == 5 || runnersPosAlgo == 7 {
-                                //Dropped third strike not possible
-                                actionMessage.text = "Batter is out!"
-                                outs += 1
-                                balls = startingBalls
-                                strikes = startingStrikes
-                                if strikes == 3 {
-//                                    print("3 strikes, batter is out")
-                                    self.actionMessage.text = "Strike out!"
-                                    strikes = startingStrikes
-                                    balls = startingBalls
-                                    outs += 1
-                                    action = "pitching"
-                                }
-                                action = "pitching"
+                            if top {
+                                top = false
                             } else {
-                                //Dropped third strike, 1B not occupied
-                                actionMessage.text = "Dropped third strike! 1B is empty, go for it!"
-                                balls = startingBalls
-                                strikes = startingStrikes
-                                action = "running"
+                                top = true
+                                inning += 1
                             }
-                        }
-                    } else { // Missed a ball
-                        actionMessage.text = "Strike! Batter is out!"
-                        strikes += 1
-                        balls = startingBalls
-                        strikes = startingStrikes
-                        
-                        if strikes == 3 {
-//                            print("3 strikes, batter is out")
-                            self.actionMessage.text = "Strike out!"
-                            strikes = startingStrikes
-                            balls = startingBalls
-                            outs += 1
+                            outs = startingOuts
+                            runs = 0
+                            runnersPosAlgo = 0
+                            action = "change field"
+                        } else {
                             action = "pitching"
                         }
+                    } else {
                         action = "pitching"
                     }
                 }
             }
-        } else if action == "running" {
+        }
+    }
+    
+    // MARK: running action
+    func running(success: Bool) {
+        if success {
+            //if correct continue to defense
+            //                print("correct answer for running")
+            if hit == 0 || hit == 1 {
+                actionMessage.text = "Running to first base..."
+            } else if hit == 2 {
+                actionMessage.text = "Going for second base..."
+            } else if hit == 3 {
+                actionMessage.text = "Turning the bases..."
+            } else if hit == 4 {
+                actionMessage.text = "Running home!"
+            }
+            runningSuccessful = true
+            //                print("offensive time(h) = \(oTimeHandicapTime)")
+            action = "defense"
+        } else {
+            //if wrong answer and defense correct: runner out
+            //                print("wrong answer for running")
+            actionMessage.text = "Jogging to first base..."
+            runningSuccessful = false
+            //                print("offensive time(h) = \(oTimeHandicapTime)")
+            action = "defense"
+        }
+    }
+    
+    // MARK: defensive action
+    func defense(success: Bool) {
+        //            print("defensive time(h) = \(dTimeHandicapTime)")
+        if runningSuccessful {
             if success {
-                //if correct continue to defense
-//                print("correct answer for running")
-                if hit == 0 || hit == 1 {
-                    actionMessage.text = "Running to first base..."
-                } else if hit == 2 {
-                    actionMessage.text = "Going for second base..."
-                } else if hit == 3 {
-                    actionMessage.text = "Turning the bases..."
-                } else if hit == 4 {
-                    actionMessage.text = "Running home!"
-                }
-                runningSuccessful = true
-//                print("offensive time(h) = \(oTimeHandicapTime)")
-                action = "defense"
-            } else {
-                //if wrong answer and defense correct: runner out
-//                print("wrong answer for running")
-                actionMessage.text = "Jogging to first base..."
-                runningSuccessful = false
-//                print("offensive time(h) = \(oTimeHandicapTime)")
-                action = "defense"
-            }
-        } else if action == "defense" {
-//            print("defensive time(h) = \(dTimeHandicapTime)")
-            if runningSuccessful {
-                if success {
-                    if dTimeHandicapTime < oTimeHandicapTime {
-                        // Defense is faster, batter is out
-                        outs += 1
-//                        print("batter runner is out")
-                        if hit == 0 || hit == 1 {
-                            actionMessage.text = "Runner is out on first!"
-                        } else if hit == 2 {
-                            actionMessage.text = "Straight in the glove! No runners advance"
-                        } else if hit == 3 {
-                            if dTimeHandicapTime > 9 && outs < 3 {
-                                if runnersPosAlgo == 2 || runnersPosAlgo == 3 {
-                                    actionMessage.text = "Fly out! Runner tagged up and advanced to third base."
-                                } else if runnersPosAlgo == 4 || runnersPosAlgo == 5 {
-                                    actionMessage.text = "Fly out! Runner tagged up and scored a run."
-                                } else if runnersPosAlgo == 6 || runnersPosAlgo == 7 {
-                                    actionMessage.text = "Fly out! Runners advanced, scoring one run."
-                                } else {
-                                    actionMessage.text = "Fly out! No runners advanced."
-                                }
-                                progressRunners("tag up")
-                            } else {
-                                actionMessage.text = "Fly out! No runners could advance."
-                            }
-                        }
-                        
-                        balls = startingBalls
-                        strikes = startingStrikes
-                        action = "pitching"
-                        if outs < 3 {
-                            self.outs += 1
-                            updateBasesImage()
-                        }
-                    } else {
-//                        print("defense too slow")
-                        
-                        if hit == 0 || hit == 1 {
-                            actionMessage.text = "Defense too slow. Runner safe on first!"
-                            progressRunners("single")
-                        } else if hit == 2 {
-                            actionMessage.text = "Nice double!"
-                            progressRunners("double")
-                        } else if hit == 3 {
-                            actionMessage.text = "Wow, what a triple!"
-                            progressRunners("triple")
-                        } else {
-                            actionMessage.text = "It's high, it's far, it's out of here!"
-                            progressRunners("homerun")
-                        }
-                        
-                        updateBasesImage()
-                        balls = startingBalls
-                        strikes = startingStrikes
-                        if top {
-                            hitsAway += 1
-                        } else {
-                            hitsHome += 1
-                        }
-                        self.action = "pitching"
-                    }
-                } else { // wrong answer
-                    // Defense too slow, runner safe on first
-//                    print("runner safe")
-                    
-                    if hit == 0 {
-                        actionMessage.text = "Safe on first due to a defensive error!"
-                        progressRunners("single")
-                        if top {
-                            errorsAway += 1
-                        } else {
-                            errorsHome += 1
-                        }
-                    } else if hit == 1 {
-                        actionMessage.text = "A single just turned into a double due to an error"
-                        progressRunners("double")
-                        if top {
-                            hitsAway += 1
-                        } else {
-                            hitsHome += 1
-                        }
-                    } else if hit == 2 {
-                        actionMessage.text = "An easy double!"
-                        progressRunners("double")
-                        if top {
-                            hitsAway += 1
-                        } else {
-                            hitsHome += 1
-                        }
-                    } else if hit == 3 {
-                        actionMessage.text = "Nice triple. The defense was stunned!"
-                        progressRunners("triple")
-                        if top {
-                            hitsAway += 1
-                        } else {
-                            hitsHome += 1
-                        }
-                    } else {
-                        actionMessage.text = "Nothing the defense could do there!"
-                        progressRunners("homerun")
-                        if top {
-                            hitsAway += 1
-                        } else {
-                            hitsHome += 1
-                        }
-                    }
-                    updateBasesImage()
-                    balls = startingBalls
-                    strikes = startingStrikes
-                    self.action = "pitching"
-                }
-            } else {
-                if success && dTimeHandicapTime < oTimeHandicapTime {
+                if dTimeHandicapTime < oTimeHandicapTime {
                     // Defense is faster, batter is out
-//                    print("batter runner is out")
-                    actionMessage.text = "Runner is out on first!"
                     outs += 1
+                    //                        print("batter runner is out")
+                    if hit == 0 || hit == 1 {
+                        actionMessage.text = "Runner is out on first!"
+                    } else if hit == 2 {
+                        actionMessage.text = "Straight in the glove! No runners advance"
+                    } else if hit == 3 {
+                        if dTimeHandicapTime > 9 && outs < 3 {
+                            if runnersPosAlgo == 2 || runnersPosAlgo == 3 {
+                                actionMessage.text = "Fly out! Runner tagged up and advanced to third base."
+                            } else if runnersPosAlgo == 4 || runnersPosAlgo == 5 {
+                                actionMessage.text = "Fly out! Runner tagged up and scored a run."
+                            } else if runnersPosAlgo == 6 || runnersPosAlgo == 7 {
+                                actionMessage.text = "Fly out! Runners advanced, scoring one run."
+                            } else {
+                                actionMessage.text = "Fly out! No runners advanced."
+                            }
+                            progressRunners("tag up")
+                        } else {
+                            actionMessage.text = "Fly out! No runners could advance."
+                        }
+                    }
+                    
                     balls = startingBalls
                     strikes = startingStrikes
-                    self.action = "pitching"
-                    if outs < 3 {
-                        outs += 1
+                    action = "pitching"
+                    if outs == 3 {
+                        balls = startingBalls
+                        strikes = startingStrikes
+                        if top {
+                            top = false
+                        } else {
+                            top = true
+                            inning += 1
+                        }
+                        outs = startingOuts
+                        runs = 0
+                        runnersPosAlgo = 0
+                        action = "change field"
+                    } else {
+                        action = "pitching"
                     }
-                } else if !success {
-//                    print("reached on error")
-                    actionMessage.text = "Reached first base on error."
-                    progressRunners("single")
+                    updateBasesImage()
+                    
+                } else {
+                    //                        print("defense too slow")
+                    
+                    if hit == 0 || hit == 1 {
+                        actionMessage.text = "Defense too slow. Runner safe on first!"
+                        progressRunners("single")
+                    } else if hit == 2 {
+                        actionMessage.text = "Nice double!"
+                        progressRunners("double")
+                    } else if hit == 3 {
+                        actionMessage.text = "Wow, what a triple!"
+                        progressRunners("triple")
+                    } else {
+                        actionMessage.text = "It's high, it's far, it's out of here!"
+                        progressRunners("homerun")
+                    }
+                    
                     updateBasesImage()
                     balls = startingBalls
                     strikes = startingStrikes
+                    if top {
+                        hitsAway += 1
+                    } else {
+                        hitsHome += 1
+                    }
+                    self.action = "pitching"
+                }
+            } else { // wrong answer
+                // Defense too slow, runner safe on first
+                //                    print("runner safe")
+                
+                if hit == 0 {
+                    actionMessage.text = "Safe on first due to a defensive error!"
+                    progressRunners("single")
                     if top {
                         errorsAway += 1
                     } else {
                         errorsHome += 1
                     }
-                    action = "pitching"
-                } else {
-                    // foul ball
-//                    print("foul ball")
-                    actionMessage.text = "Foul ball! Try again."
-                    if strikes < 2 {
-                        strikes += 1
+                } else if hit == 1 {
+                    actionMessage.text = "A single just turned into a double due to an error"
+                    progressRunners("double")
+                    if top {
+                        hitsAway += 1
+                    } else {
+                        hitsHome += 1
                     }
-                    self.action = "pitching"
+                } else if hit == 2 {
+                    actionMessage.text = "An easy double!"
+                    progressRunners("double")
+                    if top {
+                        hitsAway += 1
+                    } else {
+                        hitsHome += 1
+                    }
+                } else if hit == 3 {
+                    actionMessage.text = "Nice triple. The defense was stunned!"
+                    progressRunners("triple")
+                    if top {
+                        hitsAway += 1
+                    } else {
+                        hitsHome += 1
+                    }
+                } else {
+                    actionMessage.text = "Nothing the defense could do there!"
+                    progressRunners("homerun")
+                    if top {
+                        hitsAway += 1
+                    } else {
+                        hitsHome += 1
+                    }
                 }
+                updateBasesImage()
+                balls = startingBalls
+                strikes = startingStrikes
+                self.action = "pitching"
             }
+        } else {
+            if success && dTimeHandicapTime < oTimeHandicapTime {
+                // Defense is faster, batter is out
+                //                    print("batter runner is out")
+                actionMessage.text = "Runner is out on first!"
+                outs += 1
+                balls = startingBalls
+                strikes = startingStrikes
+                self.action = "pitching"
+                if outs == 3 {
+                    balls = startingBalls
+                    strikes = startingStrikes
+                    if top {
+                        top = false
+                    } else {
+                        top = true
+                        inning += 1
+                    }
+                    outs = startingOuts
+                    runs = 0
+                    runnersPosAlgo = 0
+                    action = "change field"
+                } else {
+                    action = "pitching"
+                }
+            } else if !success {
+                //                    print("reached on error")
+                actionMessage.text = "Reached first base on error."
+                progressRunners("single")
+                showExtraMessage("Single")
+                updateBasesImage()
+                balls = startingBalls
+                strikes = startingStrikes
+                if top {
+                    errorsAway += 1
+                } else {
+                    errorsHome += 1
+                }
+                action = "pitching"
+            } else {
+                // foul ball
+                //                    print("foul ball")
+                actionMessage.text = "Foul ball! Try again."
+                if strikes < 2 {
+                    strikes += 1
+                }
+                self.action = "pitching"
+            }
+        }
+    }
+
+    // MARK: action result filter
+    func actionResult(success: Bool) {
+        //Upon success (pitching, batting, running, defense)
+//        print("actionResult! inning: \(inning), top: \(top), action: \(action), success: \(success), runs: \(runs), total runs: \(totalruns)")
+        if action == "pitching" {
+            pitching(success: success)
+        } else if action == "batting" {
+            batting(success: success)
+        } else if action == "running" {
+            running(success: success)
+        } else if action == "defense" {
+            defense(success: success)
         }
         updateBoxScore(inning: inning, top: top)
         if outs == 3 {
@@ -752,45 +1126,36 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                 inning += 1
             }
             runs = 0
-            action = "pitching"
+            runnersPosAlgo = 0
+            action = "change field"
         }
         storyBoard()
        
     }
 
-    // MARK: - check strikes and outs
-    func checkStrikesAndOuts() {
-        if strikes == 3 {
-//            print("3 strikes, batter is out")
-            self.actionMessage.text = "Strike out!"
-            strikes = startingStrikes
-            balls = startingBalls
-            outs += 1
-            action = "pitching"
-        }
-        if outs == 3 {
-            balls = startingBalls
-            strikes = startingStrikes
-            if top {
-                top = false
-            } else {
-                top = true
-                inning += 1
-            }
-            outs = startingOuts
-            runs = 0
-            action = "pitching"
-        }
-    }
     
     // MARK: - show confirm button
     func confirm() {
+        if top {
+            if action == "batting" || action == "running" {
+                goButton.setTitle("\(awayPlayerName) GO!", for: .normal)
+            } else {
+                goButton.setTitle("\(homePlayerName) GO!", for: .normal)
+            }
+        } else {
+            if action == "batting" || action == "running" {
+                goButton.setTitle("\(homePlayerName) GO!", for: .normal)
+            } else {
+                goButton.setTitle("\(awayPlayerName) GO!", for: .normal)
+            }
+        }
+        goButton.isUserInteractionEnabled = true
         goButton.isHidden = false
     }
     
     // MARK: - moveOn to math question
     func moveOn(team: Int) {
-        actionMessage.text = action + "..."
+        actionMessage.text = action.capitalized + "..."
         // Show math
         mathQuestionView.isHidden = false
         // Fill math question
@@ -833,31 +1198,39 @@ class GameViewController: UIViewController, UITextFieldDelegate {
 //            print("x")
             // Pick a random number from the dictionary keys
             if team == 1 {
-                let randomTable = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenAway.count)))
-                mult1 = self.randomVermenigvuldigenAway[randomTable]
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenAway.count)))
+                mult1 = self.randomVermenigvuldigenAway[randomNumber]
+                let randomN = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenAway.count)))
+                mult2 = tablesDictVAway?[mult1!]?[randomN]
             } else {
-                let randomTable = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenHome.count)))
-                mult1 = self.randomVermenigvuldigenHome[randomTable]
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenHome.count)))
+                mult1 = self.randomVermenigvuldigenHome[randomNumber]
+                let randomN = Int(arc4random_uniform(UInt32(self.randomVermenigvuldigenAway.count)))
+                mult2 = tablesDictVAway?[mult1!]?[randomN]
             }
-            mult2 = tablesDictVAway?[mult1!]?[0]
+            
             mathLabel1.text = String(describing: mult2!)
             mathLabel2.text = String(describing: mult1!)
             correctAnswer = String(mult1! * mult2!)
         } else {
 //            print(":")
             if team == 1 {
-                let randomTable = Int(arc4random_uniform(UInt32(self.randomDelenAway.count)))
-                mult1 = self.randomDelenAway[randomTable]
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomDelenAway.count)))
+                mult1 = Array((tablesDictDAway?.keys)!)[randomNumber]
+//                print("mult1: \(String(describing: mult1))")
             } else {
-                let randomTable = Int(arc4random_uniform(UInt32(self.randomDelenHome.count)))
-                mult1 = self.randomDelenHome[randomTable]
+                let randomNumber = Int(arc4random_uniform(UInt32(self.randomDelenHome.count)))
+                mult1 = Array((tablesDictDHome?.keys)!)[randomNumber]
+//                print("mult1: \(String(describing: mult1))")
+                
             }
-            mult2 = tablesDictDAway?[mult1!]?[0]
+            let randomN = Int(arc4random_uniform(UInt32(self.randomDelenAway.count)))
+            mult2 = tablesDictDAway?[mult1!]?[randomN]
+//            print("mult2: \(String(describing: mult2))")
             mathLabel1.text = String(describing: mult2!)
             mathLabel2.text = String(describing: mult1!)
             correctAnswer = String(mult2! / mult1!)
         }
-        answerField.becomeFirstResponder()
     }
     
     
@@ -889,6 +1262,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         //        print("textFieldShouldBeginEditing")
         textField.isUserInteractionEnabled = true
         textField.isEnabled = true
+        
         return true
     }
     
@@ -927,6 +1301,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 4 {
                 runnersPosAlgo = 0
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -935,6 +1310,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 5 {
                 runnersPosAlgo = 1
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -943,6 +1319,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 6 {
                 runnersPosAlgo = 4
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -951,6 +1328,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 7 {
                 runnersPosAlgo = 5
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -971,6 +1349,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 7 {
                 runnersPosAlgo = 7
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -988,6 +1367,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                 runnersPosAlgo = 1
                 if outs < 3 {
                     runs += 1
+                    showRunMessage(1, message: "")
                     if top {
                         totalRunsAway += 1
                     } else {
@@ -1017,6 +1397,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
                 runnersPosAlgo = 7
                 if outs < 3 {
                     runs += 1
+                    showRunMessage(1, message: "")
                     if top {
                         totalRunsAway += 1
                     } else {
@@ -1028,23 +1409,29 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         if hit == "single" {
             if runnersPosAlgo == 0 {
                 runnersPosAlgo = 1
+                showRunMessage(0, message: "single")
             } else if runnersPosAlgo == 1 {
                 runnersPosAlgo = 3
+                showRunMessage(0, message: "single")
             } else if runnersPosAlgo == 2 {
                 runnersPosAlgo = 5
+                showRunMessage(0, message: "single")
             } else if runnersPosAlgo == 4 {
                 runnersPosAlgo = 1
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
                     totalRunsHome += 1
                 }
             } else if runnersPosAlgo == 3 {
-                runnersPosAlgo = 5
+                runnersPosAlgo = 7
+                showRunMessage(0, message: "single")
             } else if runnersPosAlgo == 5 {
                 runnersPosAlgo = 3
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1053,6 +1440,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 6 {
                 runnersPosAlgo = 5
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1061,6 +1449,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 7 {
                 runnersPosAlgo = 7
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1070,27 +1459,32 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         } else if hit == "double" {
             if runnersPosAlgo == 0 {
                 runnersPosAlgo = 2
+                showRunMessage(0, message: "double")
             } else if runnersPosAlgo == 1 {
-                runnersPosAlgo = 5
+                runnersPosAlgo = 6
+                showRunMessage(0, message: "single")
             } else if runnersPosAlgo == 2 {
-                runnersPosAlgo = 1
+                runnersPosAlgo = 2
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
                     totalRunsHome += 1
                 }
             } else if runnersPosAlgo == 4 {
-                runnersPosAlgo = 1
+                runnersPosAlgo = 2
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
                     totalRunsHome += 1
                 }
             } else if runnersPosAlgo == 3 {
-                runnersPosAlgo = 5
+                runnersPosAlgo = 6
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1099,22 +1493,25 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 5 {
                 runnersPosAlgo = 5
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
                     totalRunsHome += 1
                 }
             } else if runnersPosAlgo == 6 {
-                runnersPosAlgo = 1
+                runnersPosAlgo = 2
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
                     totalRunsHome += 2
                 }
             } else if runnersPosAlgo == 7 {
-                runnersPosAlgo = 5
+                runnersPosAlgo = 6
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
@@ -1124,9 +1521,11 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         } else if hit == "triple" {
             if runnersPosAlgo == 0 {
                 runnersPosAlgo = 4
+                showRunMessage(0, message: "triple")
             } else if runnersPosAlgo == 1 {
                 runnersPosAlgo = 4
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1135,6 +1534,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 2 {
                 runnersPosAlgo = 4
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1143,6 +1543,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 4 {
                 runnersPosAlgo = 4
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1151,6 +1552,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 3 {
                 runnersPosAlgo = 4
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
@@ -1159,6 +1561,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 5 {
                 runnersPosAlgo = 4
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
@@ -1167,6 +1570,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 6 {
                 runnersPosAlgo = 4
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
@@ -1175,6 +1579,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 7 {
                 runnersPosAlgo = 4
                 runs += 3
+                showRunMessage(3, message: "")
                 if top {
                     totalRunsAway += 3
                 } else {
@@ -1185,6 +1590,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             if runnersPosAlgo == 0 {
                 runnersPosAlgo = 0
                 runs += 1
+                showRunMessage(1, message: "")
                 if top {
                     totalRunsAway += 1
                 } else {
@@ -1193,6 +1599,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 1 {
                 runnersPosAlgo = 0
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
@@ -1201,6 +1608,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 2 {
                 runnersPosAlgo = 0
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
@@ -1209,6 +1617,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 4 {
                 runnersPosAlgo = 0
                 runs += 2
+                showRunMessage(2, message: "")
                 if top {
                     totalRunsAway += 2
                 } else {
@@ -1217,6 +1626,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 3 {
                 runnersPosAlgo = 0
                 runs += 3
+                showRunMessage(3, message: "")
                 if top {
                     totalRunsAway += 3
                 } else {
@@ -1225,6 +1635,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 5 {
                 runnersPosAlgo = 0
                 runs += 3
+                showRunMessage(3, message: "")
                 if top {
                     totalRunsAway += 3
                 } else {
@@ -1233,6 +1644,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 6 {
                 runnersPosAlgo = 0
                 runs += 3
+                showRunMessage(3, message: "")
                 if top {
                     totalRunsAway += 3
                 } else {
@@ -1241,6 +1653,7 @@ class GameViewController: UIViewController, UITextFieldDelegate {
             } else if runnersPosAlgo == 7 {
                 runnersPosAlgo = 0
                 runs += 4
+                showRunMessage(4, message: "")
                 if top {
                     totalRunsAway += 4
                 } else {
@@ -1273,59 +1686,80 @@ class GameViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - update box score
     func updateBoxScore(inning: Int, top: Bool) {
+        for inn in inningsLabel {
+            inn.viewWithTag(inning)?.backgroundColor = UIColor.FlatColor.Blue.CuriousBlue
+        }
         if inning == 1 {
             if top {
                 top1.text = String(runs)
+                top1.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom1.text = String(runs)
+                bottom1.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 2 {
             if top {
                 top2.text = String(runs)
+                top2.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom2.text = String(runs)
+                bottom2.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 3 {
             if top {
                 top3.text = String(runs)
+                top3.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom3.text = String(runs)
+                bottom3.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 4 {
             if top {
                 top4.text = String(runs)
+                top4.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom4.text = String(runs)
+                bottom4.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 5 {
             if top {
                 top5.text = String(runs)
+                top5.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom5.text = String(runs)
+                bottom5.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 6 {
             if top {
                 top6.text = String(runs)
+                top6.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom6.text = String(runs)
+                bottom6.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 7 {
             if top {
                 top7.text = String(runs)
+                top7.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom7.text = String(runs)
+                bottom7.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 8 {
             if top {
                 top8.text = String(runs)
+                top8.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom8.text = String(runs)
+                bottom8.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } else if inning == 9 {
             if top {
                 top9.text = String(runs)
+                top9.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             } else {
                 bottom9.text = String(runs)
+                bottom9.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
             }
         } // add extra inning
         if top {
@@ -1496,4 +1930,51 @@ class GameViewController: UIViewController, UITextFieldDelegate {
         }
         return tempShuffled
     }
+    
+    func showRunMessage(_ numberOfRuns: Int, message: String) {
+        if numberOfRuns == 0 {
+            runMessage.text = message
+        } else if numberOfRuns == 1 {
+            runMessage.text = "1 run!"
+        } else if numberOfRuns == 4 {
+            runMessage.text = "Grand Slam!"
+        } else {
+            runMessage.text = "\(numberOfRuns) runs!"
+        }
+        UIView.animate(withDuration: 3.0, delay: 0.0, options: .curveEaseIn, animations: {
+            self.runMessage.alpha = 1.0
+        }, completion: {
+            (finished: Bool) -> Void in
+            self.runMessage.text = ""
+            
+            UIView.animate(withDuration: 1.0, delay: 0.0, options: .curveEaseOut, animations: {
+                self.runMessage.alpha = 0.0
+            }, completion: nil)
+        })
+    }
+    
+    func showExtraMessage(_ message: String) {
+        extraMessage.text = message
+        
+        UIView.animate(withDuration: 3.0, animations: {
+            self.runMessage.alpha = 1.0
+        }, completion: {
+            (finished: Bool) -> Void in
+            self.extraMessage.text = ""
+            UIView.animate(withDuration: 1.0, delay: 0.0, options: .curveEaseOut, animations: {
+                self.extraMessage.alpha = 0.0
+            }, completion: nil)
+        })
+    }
+    /*
+    func showFlashMessage(message: String) {
+        print("showing Flashmessage: \(message)")
+        self.flashMessage.text = message
+        UIView.animate(withDuration: 1.5, delay: 0.0, usingSpringWithDamping: 0.1, initialSpringVelocity: 0.0, options: .curveLinear, animations: {
+            self.flashMessage.center = CGPoint(x: 100, y:-40 + 340)
+        }, completion: { (finished: Bool) in
+            self.flashMessage.center = CGPoint(x: 100, y:-40)
+        })
+    }
+    */
 }

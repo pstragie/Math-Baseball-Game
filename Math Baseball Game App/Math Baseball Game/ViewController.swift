@@ -116,7 +116,18 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         }
         awayPlayerName.delegate = self
         homePlayerName.delegate = self
+        collectionView.delegate = self
+        collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
+        
+        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
+        layout.minimumInteritemSpacing = 10
+        layout.minimumLineSpacing = 10
+        let screenWidth = UIScreen.main.bounds.width
+        let cellSquareSize: CGFloat = (screenWidth - 38 - 38 - 40) / 4
+        layout.itemSize = CGSize(width: cellSquareSize, height: cellSquareSize)
+        collectionView.collectionViewLayout = layout
         setupLayout()
     }
 
@@ -162,7 +173,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // MARK: - Prepare
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.identifier! {
-        case "1P Mode":
+        case "segueToGame1P":
             let destination = segue.destination as! GameViewController
             destination.playerMode = 1
             destination.startingBalls = Int(startingBalls.value)
@@ -449,20 +460,20 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         // handle tap events
         collectionView.cellForItem(at: indexPath)?.backgroundColor = UIColor.FlatColor.Violet.Wisteria
         collectionView.cellForItem(at: indexPath)?.layer.borderColor = UIColor.FlatColor.Violet.BlueGem.cgColor
-        print("You selected cell #\(indexPath.item)!")
+//        print("You selected cell #\(indexPath.item)!")
         selectedMaths.append(items[indexPath.item])
-        print("selected maths = \(selectedMaths)")
+//        print("selected maths = \(selectedMaths)")
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         // handle deselect events
         collectionView.cellForItem(at: indexPath)?.backgroundColor = UIColor.FlatColor.Gray.WhiteSmoke
         collectionView.cellForItem(at: indexPath)?.layer.borderColor = UIColor.FlatColor.Gray.IronGray.cgColor
-        print("You deselected cell #\(indexPath.item)!")
+//        print("You deselected cell #\(indexPath.item)!")
         if let indexInSelected = selectedMaths.index(of: items[indexPath.item]) {
             selectedMaths.remove(at: indexInSelected)
         }
-        print("selected maths = \(selectedMaths)")
+//        print("selected maths = \(selectedMaths)")
     }
     
     
@@ -487,12 +498,18 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // MARK: keyboard return function
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if awayPlayerName.isFirstResponder {
-            homePlayerName.becomeFirstResponder()
+            if homePlayerName.text == "" {
+                homePlayerName.becomeFirstResponder()
+            } else {
+                awayPlayerName.resignFirstResponder()
+            }
         } else if homePlayerName.isFirstResponder {
-            awayPlayerName.becomeFirstResponder()
+            if awayPlayerName.text == "" {
+                awayPlayerName.becomeFirstResponder()
+            } else {
+                homePlayerName.resignFirstResponder()
+            }
         }
         return true
     }
 }
-
-
